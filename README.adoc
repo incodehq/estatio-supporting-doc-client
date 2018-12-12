@@ -67,11 +67,18 @@ final org.w3c.dom.Document xmlDoc = xmlDocClient.fetch("CAR-0259", "2017");
 This `xmlDoc` must then be parsed.
 The base 64 encoded byte array for the PDF can be accessed under `/documentsDto/documents/document`.
 
+As a convenience, the library also includes a helper which will dump the document(s) to the filesystem:
+
+[source,java]
+----
+docClient.fetchAndWrite("CAR-0259", "2017", "target/files");
+----
+
+This helper demonstrates how to parse out the byte array using XPath.
 
 == Testing
 
 This library includes a simple JUnit tests for each API, namely `DocClient_Test` and `XmlDocClient_Test`.
-The latter uses XPath to extract out the base 64 bytes.
 
 To find other invoices with attached documents of type "Tax Register (for Invoice)" or "Supplier Receipt (for Invoice)", use:
 
