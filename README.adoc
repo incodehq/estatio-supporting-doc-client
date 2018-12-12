@@ -1,0 +1,67 @@
+= README
+
+This repo has sample code which can be used to retrieve a supporting PDF held by Estatio.
+
+The main API is:
+
+[source,java]
+----
+final String host = "estatio-test.int.ecpnv.com";
+final String user = "estatio-user-it";
+final String pass = "pass";
+final DocClient docClient = new DocClient(host, user, pass);
+
+final DocumentsDto dto = docClient.fetchAndWrite("CAR-0259", "2017", "target/files");
+----
+
+The `DocumentsDto` (see dependencies, below) exposes all supporting documents as base 64 encoded strings of PDF byte[] array.
+
+As a convenience, the library also includes a helper which will dump the document(s) to the filesystem:
+
+[source,java]
+----
+docClient.fetchAndWrite("CAR-0259", "2017", "target/files");
+----
+
+== Dependencies
+
+The library uses https://github.com/incodehq/estatio-canonical[incodehq/estatio-canonical] which defines the `DocumentsDto` structure.
+This library can be downloaded from the Maven repo hosted at link:https://repo.incode.cloud/#browse/search/maven=attributes.maven2.artifactId%3Destatio-canonical[repo.incode.cloud].
+
+If not using Maven, you can link:https://repo.incode.cloud/repository/maven-dev/org/incode/estatio/estatio-canonical/2.0.0-M1.20181127-1604-66d21321/estatio-canonical-2.0.0-M1.20181127-1604-66d21321.jar[download the JAR file] directly.
+
+There are no other third-party dependencies.
+
+== Testing
+
+This library includes a simple JUnit test, `DocClient_Test`, that retrieves a document.
+
+To find other invoices with attached documents of type "Tax Register (for Invoice)" or "Supplier Receipt (for Invoice)", use:
+
+[source,sql]
+----
+with x as (
+  select i.invoiceNumber,
+         i.invoiceDate,
+         (select count(*)
+          from PaperclipForInvoice pfi
+          join incodeDocuments.Paperclip p on pfi.id = p.id
+          join incodeDocuments.DocumentAbstract da on p.documentId = da.id
+          join incodeDocuments.DocumentType dt on da.typeId = dt.id
+          where i.id = pfi.invoiceId
+            and dt.name like 'Tax%') as count_tax,
+         (select count(*)
+          from PaperclipForInvoice pfi
+          join incodeDocuments.Paperclip p on pfi.id = p.id
+          join incodeDocuments.DocumentAbstract da on p.documentId = da.id
+          join incodeDocuments.DocumentType dt on da.typeId = dt.id
+          where i.id = pfi.invoiceId
+            and dt.name like 'Sup%') as count_supplier
+  from Invoice i
+)
+select *
+  from x
+where count_supplier > 0 or count_tax > 0
+order by 2,1
+----
+
