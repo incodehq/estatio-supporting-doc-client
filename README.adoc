@@ -1,8 +1,24 @@
 = README
 
-This repo has sample code which can be used to retrieve a supporting PDF held by Estatio.
+This repo has sample code which can be used to retrieve a supporting PDFs held by Estatio, leveraging the `lease.SupportingDocumentService#findSupportingDocuments` REST endpoint.
 
-The main API is:
+There are two implementations:
+
+* `DocClient` returns the documents using the `DocumentsDto` structure
+defined by the https://github.com/incodehq/estatio-canonical[incodehq/estatio-canonical] supporting library (a canonical and supported API for describing data obtained from Estatio).
++
+This library is the simplest to use, and is generally recommended.
+* `XmlDocClient` returns the PDF documents in a generic `org.w3c.dom.Document` object.
++
+Use this library if having no external dependencies is a strict requirement.
+
+
+The sections below explain how to use each client.
+
+
+== DocClient
+
+The main API for `DocClient` is:
 
 [source,java]
 ----
@@ -11,7 +27,7 @@ final String user = "estatio-user-it";
 final String pass = "pass";
 final DocClient docClient = new DocClient(host, user, pass);
 
-final DocumentsDto dto = docClient.fetchAndWrite("CAR-0259", "2017", "target/files");
+final DocumentsDto dto = docClient.fetch("CAR-0259", "2017");
 ----
 
 The `DocumentsDto` (see dependencies, below) exposes all supporting documents as base 64 encoded strings of PDF byte[] array.
@@ -23,18 +39,39 @@ As a convenience, the library also includes a helper which will dump the documen
 docClient.fetchAndWrite("CAR-0259", "2017", "target/files");
 ----
 
-== Dependencies
+=== Dependencies
 
-The library uses https://github.com/incodehq/estatio-canonical[incodehq/estatio-canonical] which defines the `DocumentsDto` structure.
+As noted above, the library uses https://github.com/incodehq/estatio-canonical[incodehq/estatio-canonical] which defines the `DocumentsDto` structure.
 This library can be downloaded from the Maven repo hosted at link:https://repo.incode.cloud/#browse/search/maven=attributes.maven2.artifactId%3Destatio-canonical[repo.incode.cloud].
 
 If not using Maven, you can link:https://repo.incode.cloud/repository/maven-dev/org/incode/estatio/estatio-canonical/2.0.0-M1.20181127-1604-66d21321/estatio-canonical-2.0.0-M1.20181127-1604-66d21321.jar[download the JAR file] directly.
 
 There are no other third-party dependencies.
 
+
+
+== XmlDocClient
+
+The main API for `XmlDocClient` is:
+
+[source,java]
+----
+final String host = "estatio-test.int.ecpnv.com";
+final String user = "estatio-user-it";
+final String pass = "pass";
+final XmlDocClient xmlDocClient = new XmlDocClient(host, user, pass);
+
+final org.w3c.dom.Document xmlDoc = xmlDocClient.fetch("CAR-0259", "2017");
+----
+
+This `xmlDoc` must then be parsed.
+The base 64 encoded byte array for the PDF can be accessed under `/documentsDto/documents/document`.
+
+
 == Testing
 
-This library includes a simple JUnit test, `DocClient_Test`, that retrieves a document.
+This library includes a simple JUnit tests for each API, namely `DocClient_Test` and `XmlDocClient_Test`.
+The latter uses XPath to extract out the base 64 bytes.
 
 To find other invoices with attached documents of type "Tax Register (for Invoice)" or "Supplier Receipt (for Invoice)", use:
 
