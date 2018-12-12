@@ -71,7 +71,7 @@ As a convenience, the library also includes a helper which will dump the documen
 
 [source,java]
 ----
-docClient.fetchAndWrite("CAR-0259", "2017", "target/files");
+xmlDocClient.fetchAndWrite("CAR-0259", "2017", "target/files");
 ----
 
 This helper demonstrates how to parse out the byte array using XPath.
