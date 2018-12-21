@@ -2,18 +2,18 @@ package org.incode.ecp.estatio.docclient;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.Document;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import org.estatio.canonical.invoicenumbers.v2.InvoiceNumbersDto;
+
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertThat;
 
 /**
  * See the <code>README.adoc</code> for a query to return further example docs.
  */
-public class XmlDocClient_Test {
+public class DocListClient_Test {
 
-    private XmlDocClient xmlDocClient;
+    private DocListClient docListClient;
 
     @Before
     public void setUp() throws Exception {
@@ -22,18 +22,20 @@ public class XmlDocClient_Test {
         final String user = "docreader";
         final String pass = "pass";
 
-        xmlDocClient = new XmlDocClient(host, user, pass);
+        final DocClient docClient = new DocClient(host, user, pass);
+
+        docListClient = new DocListClient(host, user, pass, docClient);
     }
 
     @Test
     public void fetch() throws Exception {
-        final Document xmlDocument = xmlDocClient.fetch("CAR-0259", 2017);
+        final InvoiceNumbersDto invoiceNumbersDto = docListClient.fetch(2017);
 
-        assertThat(xmlDocument, is(notNullValue()));
+        assertThat(invoiceNumbersDto.getInvoiceNumbers().size(), greaterThan(50));
     }
 
     @Test
     public void fetchAndWrite() throws Exception {
-        xmlDocClient.fetchAndWrite("CAR-0259", 2017, "target/files");
+        docListClient.fetchAndWrite(2017, "target/files");
     }
 }

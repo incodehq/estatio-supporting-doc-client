@@ -18,8 +18,8 @@ public class DocClient_Test {
     @Before
     public void setUp() throws Exception {
 
-        final String host = "estatio-test.int.ecpnv.com";
-        final String user = "estatio-user-it";
+        final String host = "https://estatio-dev-dha.int.ecpnv.com";
+        final String user = "docreader";
         final String pass = "pass";
 
         docClient = new DocClient(host, user, pass);
@@ -27,13 +27,13 @@ public class DocClient_Test {
 
     @Test
     public void fetch() throws Exception {
-        final DocumentsDto documentsDto = docClient.fetch("CAR-0259", "2017");
+        final DocumentsDto documentsDto = docClient.fetch("CAR-0259", 2017);
 
         assertThat(documentsDto.getDocuments(), hasSize(1));
     }
 
     @Test
     public void fetchAndWrite() throws Exception {
-        docClient.fetchAndWrite("CAR-0259", "2017", "target/files");
+        docClient.fetchAndWrite("CAR-0259", 2017, "target/files");
     }
 }

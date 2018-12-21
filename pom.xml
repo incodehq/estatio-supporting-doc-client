@@ -17,7 +17,7 @@
         <dependency>
             <groupId>org.incode.estatio</groupId>
             <artifactId>estatio-canonical</artifactId>
-            <version>2.0.0-M1.20181127-1604-66d21321</version>
+            <version>2.0.0-M1.20181220-1551-f2c1a736</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

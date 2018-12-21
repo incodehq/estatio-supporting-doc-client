@@ -11,9 +11,9 @@ import static org.junit.Assert.assertThat;
 /**
  * See the <code>README.adoc</code> for a query to return further example docs.
  */
-public class XmlDocClient_Test {
+public class XmlDocListClient_Test {
 
-    private XmlDocClient xmlDocClient;
+    private XmlDocListClient docListClient;
 
     @Before
     public void setUp() throws Exception {
@@ -22,18 +22,20 @@ public class XmlDocClient_Test {
         final String user = "docreader";
         final String pass = "pass";
 
-        xmlDocClient = new XmlDocClient(host, user, pass);
+        final XmlDocClient docClient = new XmlDocClient(host, user, pass);
+
+        docListClient = new XmlDocListClient(host, user, pass, docClient);
     }
 
     @Test
     public void fetch() throws Exception {
-        final Document xmlDocument = xmlDocClient.fetch("CAR-0259", 2017);
+        final Document xmlDocument = docListClient.fetch(2017);
 
         assertThat(xmlDocument, is(notNullValue()));
     }
 
     @Test
     public void fetchAndWrite() throws Exception {
-        xmlDocClient.fetchAndWrite("CAR-0259", 2017, "target/files");
+        docListClient.fetchAndWrite(2017, "target/files");
     }
 }
