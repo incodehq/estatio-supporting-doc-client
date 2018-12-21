@@ -176,3 +176,15 @@ where count_supplier > 0 or count_tax > 0
 order by 2,1
 ----
 
+
+
+== Change Log
+
+`0.2`::
+* `DocListClient` and `XmlDocListClient` added.
+* `year` parameter is now an int, not a String
+* `host` parameter (to constructor) now also expects the protocol (eg prefix "https://").
+
+
+`0.1`::
+* initial version of `DocClient` and `XmlDocClient`
