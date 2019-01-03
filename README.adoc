@@ -7,6 +7,8 @@ There are two REST endpoints:
 * `lease.SupportingDocumentService#findInvoicesWithSupportingDocuments`
 +
 which returns a list of invoice numbers for a given year.
++
+As a check, the seller and buyer references of the invoice must also be supplied and must match the data held by Estatio.
 
 * `lease.SupportingDocumentService#findSupportingDocuments`
 +
@@ -71,7 +73,10 @@ final List<InvoiceNumberType> invoiceNumbers = invoiceNumbersDto.getInvoiceNumbe
 
 for (final InvoiceNumberType invoiceNumberDto : invoiceNumbers) {
     final String invoiceNumber = invoiceNumberDto.getInvoiceNumber();
-    DocumentsDto documentsDto = docClient.fetch(invoiceNumber, year);
+    final String sellerReference = invoiceNumberDto.getSellerReference();
+    final String buyerReference = invoiceNumberDto.getBuyerReference();
+    DocumentsDto documentsDto =
+        docClient.fetch(invoiceNumber, year, sellerReference, buyerReference);
 
     // ... do whatever.
 }
@@ -118,13 +123,13 @@ final org.w3c.dom.Document xmlDoc = xmlDocClient.fetch(2017);
 ----
 
 This resultant XML Document must then be parsed.
-The invoice numbers can be accessed under `/invoiceNumbersDto/invoiceNumbers/invoiceNumber/invoiceNumber`
+The invoice numbers can be accessed under `/invoiceNumbersDto/invoiceNumbers/invoiceNumber`
 
 As a convenience, the client also includes a helper which will dump the document(s) to the filesystem:
 
 [source,java]
 ----
-xmlDocListClient.fetchAndWrite(2017, "target/files");
+xmlDocListClient.fetchAndWrite(2017, "target/files-xml");
 ----
 
 For more fine-grained control, the `XmlDocClient` can be used to obtain all the (PDF) documents for an invoice:
@@ -136,7 +141,7 @@ final String user = "docreader";
 final String pass = "pass";
 final XmlDocClient docListClient = new XmlDocClient(host, user, pass);
 
-final org.w3c.dom.Document xmlDoc = xmlDocClient.fetch("CAR-0259", 2017);
+final org.w3c.dom.Document xmlDoc = xmlDocClient.fetch("CAR-0259", 2017, "IT01", "ITCL10611");
 ----
 
 Again, the resultant XML Document must be parsed.
@@ -148,34 +153,6 @@ The base 64 encoded byte array for each of the PDF(s) can be accessed under `/do
 
 This library includes simple JUnit tests for each client, namely `DocListClient_Test`, `DocClient_Test`,  `XmlDocListClient_Test` and `XmlDocClient_Test`.
 
-To find other invoices with attached documents of type "Tax Register (for Invoice)" or "Supplier Receipt (for Invoice)", use:
-
-[source,sql]
-----
-with x as (
-  select i.invoiceNumber,
-         i.invoiceDate,
-         (select count(*)
-          from PaperclipForInvoice pfi
-          join incodeDocuments.Paperclip p on pfi.id = p.id
-          join incodeDocuments.DocumentAbstract da on p.documentId = da.id
-          join incodeDocuments.DocumentType dt on da.typeId = dt.id
-          where i.id = pfi.invoiceId
-            and dt.reference = 'TAX-REGISTER') as count_tax,
-         (select count(*)
-          from PaperclipForInvoice pfi
-          join incodeDocuments.Paperclip p on pfi.id = p.id
-          join incodeDocuments.DocumentAbstract da on p.documentId = da.id
-          join incodeDocuments.DocumentType dt on da.typeId = dt.id
-          where i.id = pfi.invoiceId
-            and dt.reference = 'SUPPLIER-RECEIPT') as count_supplier
-  from Invoice i
-)
-select *
-  from x
-where count_supplier > 0 or count_tax > 0
-order by 2,1
-----
 
 
 
