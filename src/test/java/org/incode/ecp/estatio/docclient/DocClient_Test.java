@@ -18,7 +18,8 @@ public class DocClient_Test {
     @Before
     public void setUp() throws Exception {
 
-        final String host = "https://estatio-dev-dha.int.ecpnv.com";
+        final String host = "https://estatio.int.ecpnv.com";
+        //final String host = "https://estatio-dev-dha.int.ecpnv.com";
         //final String host = "http://localhost:7070";
 
         final String user = "docreader";
