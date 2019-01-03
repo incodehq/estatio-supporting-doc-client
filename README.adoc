@@ -181,6 +181,22 @@ order by 2,1
 
 == Change Log
 
+`0.3`::
+* runs against updated version of Estatio, which now requires that `sellerReference` and `buyerReference` are now supplied when querying for an invoice.
+These values must match those of the invoice, otherwise no documents are returned.
+This guards against possibly invalid data held by the caller.
+
+* reflected by new parameters `sellerReference` and `buyerReference` now required by `DocClient` / `XmlDocClient`.
++
+[NOTE]
+====
+The document list retrieved by `DocListClient` / `XmlDocListClient` has been updated so that it includes these fields.
+The tests of the two ``XxxListClient``s utilize this.
+====
+
+* bumps to corresponding new version of `estatio-canonical`.
+
+
 `0.2`::
 * `DocListClient` and `XmlDocListClient` added.
 * `year` parameter is now an int, not a String

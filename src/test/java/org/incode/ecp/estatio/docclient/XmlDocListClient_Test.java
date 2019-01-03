@@ -18,7 +18,9 @@ public class XmlDocListClient_Test {
     @Before
     public void setUp() throws Exception {
 
-        final String host = "https://estatio-dev-dha.int.ecpnv.com";
+        //final String host = "https://estatio-dev-dha.int.ecpnv.com";
+        final String host = "http://localhost:7070";
+
         final String user = "docreader";
         final String pass = "pass";
 
@@ -36,6 +38,6 @@ public class XmlDocListClient_Test {
 
     @Test
     public void fetchAndWrite() throws Exception {
-        docListClient.fetchAndWrite(2017, "target/files");
+        docListClient.fetchAndWrite(2017, "target/files-xml");
     }
 }

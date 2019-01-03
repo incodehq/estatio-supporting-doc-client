@@ -10,8 +10,8 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
 import static org.incode.ecp.estatio.docclient.Util.openConnection;
@@ -45,7 +45,8 @@ public class XmlDocListClient {
     /**
      * @param year - invoice numbers are reset each year.
      */
-    public Document fetch(final int year) throws IOException, ParserConfigurationException, SAXException {
+    public Document fetch(final int year)
+            throws IOException, ParserConfigurationException, SAXException {
         final String url = String.format(
                 "%s/restful/services/%s/actions/%s/invoke?year=%d",
                 host, "lease.SupportingDocumentService", "findInvoicesWithSupportingDocuments", year);
@@ -66,14 +67,22 @@ public class XmlDocListClient {
 
         xPath.setNamespaceContext(new XmlUtil.NamespaceResolver(document));
         final NodeList nodes = (NodeList) xPath.evaluate(
-                "/invoicenumbers:invoiceNumbersDto/invoicenumbers:invoiceNumbers/invoicenumbers:invoiceNumber/invoicenumbers:invoiceNumber/text()",
+                "/invoicenumbers:invoiceNumbersDto/invoicenumbers:invoiceNumbers/invoicenumbers:invoiceNumber",
                 document, XPathConstants.NODESET);
         for (int i = 0; i < nodes.getLength(); ++i) {
-            final Text item = (Text) nodes.item(i);
-            final String invoiceNumber = item.getWholeText();
-            docClient.fetchAndWrite(invoiceNumber, year, directory + "/" + invoiceNumber);
+            final Node node = nodes.item(i);
+            final String invoiceNumber = string(node, "invoicenumbers:invoiceNumber/text()", xPath);
+            final String sellerReference = string(node, "invoicenumbers:sellerReference/text()", xPath);
+            final String buyerReference = string(node, "invoicenumbers:buyerReference/text()", xPath);
+            docClient.fetchAndWrite(invoiceNumber, year, sellerReference, buyerReference, directory + "/" + invoiceNumber);
         }
     }
 
+    private static String string(
+            final Node node,
+            final String xpathExpression,
+            final XPath xPath) throws XPathExpressionException {
+        return (String) xPath.evaluate(xpathExpression, node, XPathConstants.STRING);
+    }
 
 }

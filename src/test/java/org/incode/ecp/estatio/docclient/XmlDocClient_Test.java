@@ -18,7 +18,9 @@ public class XmlDocClient_Test {
     @Before
     public void setUp() throws Exception {
 
-        final String host = "https://estatio-dev-dha.int.ecpnv.com";
+        //final String host = "https://estatio-dev-dha.int.ecpnv.com";
+        final String host = "http://localhost:7070";
+
         final String user = "docreader";
         final String pass = "pass";
 
@@ -27,13 +29,13 @@ public class XmlDocClient_Test {
 
     @Test
     public void fetch() throws Exception {
-        final Document xmlDocument = xmlDocClient.fetch("CAR-0259", 2017);
+        final Document xmlDocument = xmlDocClient.fetch("CAR-0259", 2017, "IT01", "ITCL10611");
 
         assertThat(xmlDocument, is(notNullValue()));
     }
 
     @Test
     public void fetchAndWrite() throws Exception {
-        xmlDocClient.fetchAndWrite("CAR-0259", 2017, "target/files");
+        xmlDocClient.fetchAndWrite("CAR-0259", 2017, "IT01", "ITCL10611", "target/files-xml");
     }
 }

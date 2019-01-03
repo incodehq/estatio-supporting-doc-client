@@ -40,7 +40,8 @@ public class DocListClient {
     /**
      * @param year - invoice numbers are reset each year.
      */
-    public InvoiceNumbersDto fetch(final int year) throws IOException {
+    public InvoiceNumbersDto fetch(final int year)
+            throws IOException {
         final String url = String.format(
                 "%s/restful/services/%s/actions/%s/invoke?year=%d",
                 host, "lease.SupportingDocumentService", "findInvoicesWithSupportingDocuments", year);
@@ -64,9 +65,10 @@ public class DocListClient {
 
         for (final InvoiceNumberType invoiceNumberDto : invoiceNumbers) {
             final String invoiceNumber = invoiceNumberDto.getInvoiceNumber();
-            docClient.fetchAndWrite(invoiceNumber, year, directory + "/" + invoiceNumber);
+            final String sellerReference = invoiceNumberDto.getSellerReference();
+            final String buyerReference = invoiceNumberDto.getBuyerReference();
+            docClient.fetchAndWrite(invoiceNumber, year, sellerReference, buyerReference, directory + "/" + invoiceNumber);
         }
-
     }
 
 

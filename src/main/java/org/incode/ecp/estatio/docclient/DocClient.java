@@ -28,13 +28,20 @@ public class DocClient {
     }
 
     /**
-     * @param invoiceNumber - stored as <code>extRef1</code> in <code>oas_docline</code>
-     * @param year - invoice numbers are reset each year.
+     * @param invoiceNumber - stored as <code>ref1</code> in the summary <code>oas_docline</code>
+     * @param year - invoice numbers are reset each year.  Corresponds to the <code>yr</code> of the oas_dochead
+     * @param sellerReference - the reference to the party that the caller believes is the seller of the invoice, ie the <code>cmpcode</code> of the <code>oas_dochead</code>.  If it is not, then no documents will be returned
+     * @param buyerReference - the reference to the party that the caller believes is the buyer of the invoice, ie the <code>el6</code> of the summary <code>oas_docline</code>.  If it is not, then no documents will be returned
      */
-    public DocumentsDto fetch(final String invoiceNumber, final int year) throws IOException {
+    public DocumentsDto fetch(
+            final String invoiceNumber,
+            final int year,
+            final String sellerReference,
+            final String buyerReference)
+            throws IOException {
         final String url = String.format(
-                "%s/restful/services/%s/actions/%s/invoke?invoiceNumber=%s&year=%d",
-                host, "lease.SupportingDocumentService", "findSupportingDocuments", invoiceNumber, year);
+                "%s/restful/services/%s/actions/%s/invoke?invoiceNumber=%s&year=%d&sellerReference=%s&buyerReference=%s",
+                host, "lease.SupportingDocumentService", "findSupportingDocuments", invoiceNumber, year, sellerReference, buyerReference);
 
         final HttpURLConnection connection = openConnection(url, user, pass, DocumentsDto.class);
         final InputStream inputStream = connection.getInputStream();
@@ -45,18 +52,26 @@ public class DocClient {
     }
 
     /**
-     * Convenience that calls {@link #fetch(String, int)} and then writes out all returned documents to specified directory.
+     * Convenience that calls {@link #fetch(String, int, String, String)} and then writes out all returned documents to specified directory.
      *
-     * @param invoiceNumber
-     * @param year
+     * @param invoiceNumber - stored as <code>ref1</code> in the summary <code>oas_docline</code>
+     * @param year - invoice numbers are reset each year.  Corresponds to the <code>yr</code> of the oas_dochead
+     * @param sellerReference - the reference to the party that the caller believes is the seller of the invoice, ie the <code>cmpcode</code> of the <code>oas_dochead</code>.  If it is not, then no documents will be returned
+     * @param buyerReference - the reference to the party that the caller believes is the buyer of the invoice, ie the <code>el6</code> of the summary <code>oas_docline</code>.  If it is not, then no documents will be returned
      * @param directory - automatically created if required.
      */
-    public void fetchAndWrite(final String invoiceNumber, final int year, final String directory) throws IOException {
+    public void fetchAndWrite(
+            final String invoiceNumber,
+            final int year,
+            final String sellerReference,
+            final String buyerReference,
+            final String directory)
+            throws IOException {
 
         final File parent = new File(directory);
         parent.mkdirs();
 
-        final DocumentsDto documentsDto = fetch(invoiceNumber, year);
+        final DocumentsDto documentsDto = fetch(invoiceNumber, year, sellerReference, buyerReference);
         final List<DocumentType> documents = documentsDto.getDocuments();
 
         for (final DocumentType document : documents) {
@@ -69,7 +84,7 @@ public class DocClient {
 
     }
 
-    private String documentNameFor(final DocumentType document) {
+    private static String documentNameFor(final DocumentType document) {
         String documentName = document.getName();
         documentName = documentName.toLowerCase().endsWith(".pdf") ? documentName : documentName + ".pdf";
         return documentName;

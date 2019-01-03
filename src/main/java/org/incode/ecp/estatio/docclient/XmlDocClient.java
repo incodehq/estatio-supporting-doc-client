@@ -32,33 +32,46 @@ public class XmlDocClient {
     }
 
     /**
-     * @param invoiceNumber - stored as <code>extRef1</code> in <code>oas_docline</code>
-     * @param year - invoice numbers are reset each year.
+     * @param invoiceNumber - stored as <code>ref1</code> in the summary <code>oas_docline</code>
+     * @param year - invoice numbers are reset each year.  Corresponds to the <code>yr</code> of the oas_dochead
+     * @param sellerReference - the reference to the party that the caller believes is the seller of the invoice, ie the <code>cmpcode</code> of the <code>oas_dochead</code>.  If it is not, then no documents will be returned
+     * @param buyerReference - the reference to the party that the caller believes is the buyer of the invoice, ie the <code>el6</code> of the summary <code>oas_docline</code>.  If it is not, then no documents will be returned
      */
-    public Document fetch(final String invoiceNumber, final int year)
+    public Document fetch(
+            final String invoiceNumber,
+            final int year,
+            final String sellerReference,
+            final String buyerReference)
             throws IOException, ParserConfigurationException, SAXException {
         final String url = String.format(
-                "%s/restful/services/%s/actions/%s/invoke?invoiceNumber=%s&year=%d",
-                host, "lease.SupportingDocumentService", "findSupportingDocuments", invoiceNumber, year);
+                "%s/restful/services/%s/actions/%s/invoke?invoiceNumber=%s&year=%d&sellerReference=%s&buyerReference=%s",
+                host, "lease.SupportingDocumentService", "findSupportingDocuments", invoiceNumber, year, sellerReference, buyerReference);
 
         final HttpURLConnection connection = openConnection(url, user, pass, "org.estatio.canonical.documents.v2.DocumentsDto");
         return XmlUtil.toXmlDocument(connection);
     }
 
     /**
-     * Convenience that calls {@link #fetch(String, int)} and then writes out all returned documents to specified directory.
+     * Convenience that calls {@link #fetch(String, int, String, String)} and then writes out all returned documents to specified directory.
      *
-     * @param invoiceNumber
-     * @param year
+     * @param invoiceNumber - stored as <code>ref1</code> in the summary <code>oas_docline</code>
+     * @param year - invoice numbers are reset each year.  Corresponds to the <code>yr</code> of the oas_dochead
+     * @param sellerReference - the reference to the party that the caller believes is the seller of the invoice, ie the <code>cmpcode</code> of the <code>oas_dochead</code>.  If it is not, then no documents will be returned
+     * @param buyerReference - the reference to the party that the caller believes is the buyer of the invoice, ie the <code>el6</code> of the summary <code>oas_docline</code>.  If it is not, then no documents will be returned
      * @param directory - automatically created if required.
      */
-    public void fetchAndWrite(final String invoiceNumber, final int year, final String directory)
+    public void fetchAndWrite(
+            final String invoiceNumber,
+            final int year,
+            final String sellerReference,
+            final String buyerReference,
+            final String directory)
             throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
 
         final File parent = new File(directory);
         parent.mkdirs();
 
-        final Document document = fetch(invoiceNumber, year);
+        final Document document = fetch(invoiceNumber, year, sellerReference, buyerReference);
         final XPath xPath = XPathFactory.newInstance().newXPath();
 
         xPath.setNamespaceContext(new XmlUtil.NamespaceResolver(document));
