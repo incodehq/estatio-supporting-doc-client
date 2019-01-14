@@ -31,14 +31,30 @@ public class DocListClient_Test {
     }
 
     @Test
-    public void fetch() throws Exception {
-        final InvoiceNumbersDto invoiceNumbersDto = docListClient.fetch(2017);
-
-        assertThat(invoiceNumbersDto.getInvoiceNumbers().size(), greaterThan(50));
+    public void fetch_for_specific_company() throws Exception {
+        final InvoiceNumbersDto invoiceNumbersDto = docListClient.fetch(2017, "IT01");
+        final int size = invoiceNumbersDto.getInvoiceNumbers().size();
+        assertThat(size, greaterThan(50));
     }
 
     @Test
-    public void fetchAndWrite() throws Exception {
-        docListClient.fetchAndWrite(2017, "target/files");
+    public void fetch_for_all() throws Exception {
+        final InvoiceNumbersDto invoiceNumbersDto = docListClient.fetch(2017);
+        final int size = invoiceNumbersDto.getInvoiceNumbers().size();
+        assertThat(size, greaterThan(50));
+    }
+
+    @Test
+    public void fetchAndWrite_for_all() throws Exception {
+        docListClient.fetchAndWrite(2017, "target/files/2017/_all_");
+    }
+
+    @Test
+    public void fetchAndWrite_for_specific_companies() throws Exception {
+        docListClient.fetchAndWrite(2017, "IT01", "target/files/2017/IT01");
+        docListClient.fetchAndWrite(2017, "IT04", "target/files/2017/IT04");
+        docListClient.fetchAndWrite(2017, "IT05", "target/files/2017/IT05");
+        docListClient.fetchAndWrite(2017, "IT07", "target/files/2017/IT07");
+        docListClient.fetchAndWrite(2017, "IT08", "target/files/2017/IT08");
     }
 }

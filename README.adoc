@@ -63,12 +63,12 @@ The code below shows the typical usage.
 
 [source,java]
 ----
-final String host = "https://estatio-dev-dha.int.ecpnv.com";
+final String host = "https://estatio.int.ecpnv.com";
 final String user = "docreader";
 final String pass = "pass";
 final DocListClient docListClient = new DocListClient(host, user, pass);
 
-final InvoiceNumbersDto invoiceNumbersDto = docListClient.fetch(2017);
+final InvoiceNumbersDto invoiceNumbersDto = docListClient.fetch(2017, "IT01");
 final List<InvoiceNumberType> invoiceNumbers = invoiceNumbersDto.getInvoiceNumbers();
 
 for (final InvoiceNumberType invoiceNumberDto : invoiceNumbers) {
@@ -82,8 +82,14 @@ for (final InvoiceNumberType invoiceNumberDto : invoiceNumbers) {
 }
 ----
 
+The `InvoiceNumbersDto` DTO exposes a list of invoice numbers of only those invoices that have supporting documents, for a given year, and for the given seller reference (ie company code).
 
-The `InvoiceNumbersDto` DTO exposes a list of invoice numbers of only those invoices that have supporting documents, for a given year.
+[TIP]
+====
+If the seller reference is left as null, then invoices for _all_ companies will be returned.
+Alternatively, simply call the overload which does not specify the company code (eg, `docListClient.fetch(2017)` ).
+====
+
 These invoice numbers and year can then be used to obtain the `DocumentsDto` exposes all supporting documents as base 64 encoded strings of PDF byte[] array.
 
 As a convenience, the clients also include helper methods to dump the document(s) to the filesystem.
@@ -91,10 +97,10 @@ For example:
 
 [source,java]
 ----
-docListClient.fetchAndWrite(2017, "target/files");
+docListClient.fetchAndWrite(2017, "IT01", "target/files");
 ----
 
-This will write all documents for all invoices, each in a separate subdirectory.
+This will write all documents for all invoices (for seller "IT01" and year 2017), each in a separate subdirectory.
 
 
 === Dependencies
@@ -114,13 +120,22 @@ The code below shows the typical usage.
 
 [source,java]
 ----
-final String host = "https://estatio-dev-dha.int.ecpnv.com";
+final String host = "https://estatio.int.ecpnv.com";
 final String user = "docreader";
 final String pass = "pass";
 final XmlDocListClient docListClient = new XmlDocListClient(host, user, pass);
 
-final org.w3c.dom.Document xmlDoc = xmlDocClient.fetch(2017);
+final org.w3c.dom.Document xmlDoc = xmlDocListClient.fetch(2017, "IT01");
 ----
+
+This returns an XML Document which list of invoice numbers of only those invoices that have supporting documents, for a given year, and for the given seller reference (ie company code).
+
+[TIP]
+====
+If the seller reference is left as null, then invoices for _all_ companies will be returned.
+Alternatively, simply call the overload which does not specify the company code (eg, `xmlDocListClient.fetch(2017)` ).
+====
+
 
 This resultant XML Document must then be parsed.
 The invoice numbers can be accessed under `/invoiceNumbersDto/invoiceNumbers/invoiceNumber`
@@ -136,10 +151,10 @@ For more fine-grained control, the `XmlDocClient` can be used to obtain all the 
 
 [source,java]
 ----
-final String host = "https://estatio-dev-dha.int.ecpnv.com";
+final String host = "https://estatio.int.ecpnv.com";
 final String user = "docreader";
 final String pass = "pass";
-final XmlDocClient docListClient = new XmlDocClient(host, user, pass);
+final XmlDocClient xmlDocClient = new XmlDocClient(host, user, pass);
 
 final org.w3c.dom.Document xmlDoc = xmlDocClient.fetch("CAR-0259", 2017, "IT01", "ITCL10611");
 ----
@@ -157,6 +172,10 @@ This library includes simple JUnit tests for each client, namely `DocListClient_
 
 
 == Change Log
+
+`0.4`::
+* extends the list clients so that these can optionally also qualify on `sellerReference`.
+
 
 `0.3`::
 * runs against updated version of Estatio, which now requires that `sellerReference` and `buyerReference` are now supplied when querying for an invoice.

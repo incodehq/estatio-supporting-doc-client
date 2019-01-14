@@ -38,13 +38,30 @@ public class DocListClient {
     }
 
     /**
+     * Returns all the invoices that have at least one supporting document, for the given year.
+     *
      * @param year - invoice numbers are reset each year.
      */
     public InvoiceNumbersDto fetch(final int year)
             throws IOException {
-        final String url = String.format(
+        return fetch(year, null);
+    }
+
+    /**
+     * Returns all the invoices that have at least one supporting document, for the given year and seller reference (ie <code>cmpcode</code>).
+     *
+     * @param year - invoice numbers are reset each year.
+     * @param sellerReferenceIfAny - the reference to the party acting as the seller of the invoice, ie the <code>cmpcode</code> of the <code>oas_dochead</code>.  Invoices that are not sold by this seller are ignored (filtered out).
+     */
+    public InvoiceNumbersDto fetch(final int year, final String sellerReferenceIfAny)
+            throws IOException {
+        String url = String.format(
                 "%s/restful/services/%s/actions/%s/invoke?year=%d",
                 host, "lease.SupportingDocumentService", "findInvoicesWithSupportingDocuments", year);
+        if (sellerReferenceIfAny != null) {
+            url += String.format(
+                    "&sellerReference=%s",sellerReferenceIfAny);
+        }
 
         final HttpURLConnection connection = openConnection(url, user, pass, InvoiceNumbersDto.class);
         final InputStream inputStream = connection.getInputStream();
@@ -58,9 +75,24 @@ public class DocListClient {
     /**
      * Convenience that calls {@link #fetch(int)} and then writes out all returned documents to specified directory.
      */
-    public void fetchAndWrite(final int year, final String directory) throws IOException {
+    public void fetchAndWrite(
+            final int year,
+            final String directory)
+            throws IOException {
 
-        final InvoiceNumbersDto invoiceNumbersDto = fetch(year);
+        fetchAndWrite(year, null, directory);
+    }
+
+    /**
+     * Convenience that calls {@link #fetch(int, String)} and then writes out all returned documents to specified directory.
+     */
+    public void fetchAndWrite(
+            final int year,
+            final String sellerReferenceIfAny,
+            final String directory)
+            throws IOException {
+
+        final InvoiceNumbersDto invoiceNumbersDto = fetch(year, sellerReferenceIfAny);
         final List<InvoiceNumberType> invoiceNumbers = invoiceNumbersDto.getInvoiceNumbers();
 
         for (final InvoiceNumberType invoiceNumberDto : invoiceNumbers) {

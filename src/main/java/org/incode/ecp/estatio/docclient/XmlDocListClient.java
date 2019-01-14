@@ -43,13 +43,29 @@ public class XmlDocListClient {
     }
 
     /**
+     * Returns all the invoices that have at least one supporting document, for the given year.
+     *
      * @param year - invoice numbers are reset each year.
      */
-    public Document fetch(final int year)
+    public Document fetch(final int year) throws ParserConfigurationException, SAXException, IOException {
+        return fetch(year, null);
+    }
+
+    /**
+     * Returns all the invoices that have at least one supporting document, for the given year and seller reference (ie <code>cmpcode</code>).
+     *
+     * @param year - invoice numbers are reset each year.
+     * @param sellerReferenceIfAny - the reference to the party acting as the seller of the invoice, ie the <code>cmpcode</code> of the <code>oas_dochead</code>.  Invoices that are not sold by this seller are ignored (filtered out).
+     */
+    public Document fetch(final int year, final String sellerReferenceIfAny)
             throws IOException, ParserConfigurationException, SAXException {
-        final String url = String.format(
+        String url = String.format(
                 "%s/restful/services/%s/actions/%s/invoke?year=%d",
                 host, "lease.SupportingDocumentService", "findInvoicesWithSupportingDocuments", year);
+        if (sellerReferenceIfAny != null) {
+            url += String.format(
+                    "&sellerReference=%s",sellerReferenceIfAny);
+        }
 
         final HttpURLConnection connection = openConnection(url, user, pass, "org.estatio.canonical.invoicenumbers.v2.InvoiceNumbersDto");
         return toXmlDocument(connection);
@@ -58,10 +74,23 @@ public class XmlDocListClient {
     /**
      * Convenience that calls {@link #fetch(int)} and then writes out all returned documents to specified directory.
      */
-    public void fetchAndWrite(final int year, final String directory)
+    public void fetchAndWrite(
+            final int year,
+            final String directory)
+            throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
+        fetchAndWrite(year, null, directory);
+    }
+
+    /**
+     * Convenience that calls {@link #fetch(int, String)} and then writes out all returned documents to specified directory.
+     */
+    public void fetchAndWrite(
+            final int year,
+            final String sellerReferenceIfAny,
+            final String directory)
             throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
 
-        final Document document = fetch(year);
+        final Document document = fetch(year, sellerReferenceIfAny);
 
         final XPath xPath = XPathFactory.newInstance().newXPath();
 
