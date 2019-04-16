@@ -1,6 +1,7 @@
 package org.incode.ecp.estatio.docclient;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.estatio.canonical.documents.v2.DocumentsDto;
@@ -11,6 +12,7 @@ import static org.junit.Assert.assertThat;
 /**
  * See the <code>README.adoc</code> for a query to return further example docs.
  */
+@Ignore
 public class DocClient_Test {
 
     private DocClient docClient;
@@ -18,7 +20,7 @@ public class DocClient_Test {
     @Before
     public void setUp() throws Exception {
 
-        final String host = "https://estatio.int.ecpnv.com";
+        final String host = "https://estatio-test.int.ecpnv.com";
         //final String host = "https://estatio-dev-dha.int.ecpnv.com";
         //final String host = "http://localhost:7070";
 
