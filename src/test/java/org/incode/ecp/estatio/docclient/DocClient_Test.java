@@ -19,7 +19,7 @@ public class DocClient_Test {
     public void setUp() throws Exception {
 
         final String host = "estatio-test.int.ecpnv.com";
-        final String user = "estatio-user-it";
+        final String user = "docreader";
         final String pass = "pass";
 
         docClient = new DocClient(host, user, pass);

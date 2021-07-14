@@ -19,7 +19,7 @@ public class XmlDocClient_Test {
     public void setUp() throws Exception {
 
         final String host = "estatio-test.int.ecpnv.com";
-        final String user = "estatio-user-it";
+        final String user = "docreader";
         final String pass = "pass";
 
         xmlDocClient = new XmlDocClient(host, user, pass);
@@ -29,6 +29,11 @@ public class XmlDocClient_Test {
     public void fetch() throws Exception {
         final Document documentsDto = xmlDocClient.fetch("CAR-0259", "2017");
 
+        /*
+        cmpcode:          IT12
+        Invoice nr:           CAS-0295
+        Period:                  2021/6
+         */
         assertThat(documentsDto, is(notNullValue()));
     }
 
